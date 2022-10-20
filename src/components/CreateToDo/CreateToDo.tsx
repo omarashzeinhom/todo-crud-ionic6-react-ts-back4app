@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   IonCol,
   IonLabel,
@@ -18,7 +18,7 @@ const Parse = require("parse");
 
 export default function CreateToDo() {
   //STATE VAR AND STATE ACTION AND ASSIGN PROPERTIES
-  const [newToDoObject, setNewToDoObject] = useState({
+  const [newToDoObject, setNewToDoObject] = React.useState({
     title: "",
     description: "",
     task: "",

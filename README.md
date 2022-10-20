@@ -1,7 +1,34 @@
 # About
+
 <a href="https://ionic-6-ts-back4app-todolist-andgoedu.netlify.app/login">Demo</a>
 
 An ionic 6 , web application built in typescript and react js framework ,while in terms of the backend back 4app was used as the api .
+
+- Start By
+- ```yarn install```
+- ADD Api keys from [parse dashboard back4app](https://parse-dashboard.back4app.com/)
+- 1. Select your application or create a new one
+  
+- 1.1 - Make ACLS public
+  
+- 2. Go to App settings on the left
+  
+- 3. Select security and keys and get the api keys
+
+```.env
+REACT_APP_PARSE_ID=
+REACT_APP_PARSE_HOST_URL=
+REACT_APP_PARSE_JS_KEY=
+```
+
+- After these simple steps Serve application and Enjoy !
+  
+## Start By 🚀
+
+```
+ionic serve
+```
+
 
 - Project Built With
 
@@ -16,13 +43,17 @@ Make sure you installed node and node package manager using ```npm -v``` and ```
 - Install yarn by using
   
 ```
+
 npm install -g yarn
+
 ```
 
 3. [ionic framework](https://ionicframework.com/getting-started)
 
 ```
+
 npm i -g @ionic/cli
+
 ```
 
 ## Setup the project
@@ -45,7 +76,7 @@ ionic start todoApp --type=react --capacitor
 yarn add @parse/react parse
 ```
 
-``` ``` []()
+`````` []()
 
 #### Setup BackEnd Schema
 
@@ -60,8 +91,6 @@ const PARSE_HOST_URL = 'https://parseapi.back4app.com/';
 const PARSE_JAVASCRIPT_KEY = ' ';
 
 ```
-
-
 
 ##### Project Structure and files to add
 
@@ -84,7 +113,6 @@ const PARSE_JAVASCRIPT_KEY = ' ';
 - .env                  // Where all the Api Keys are going to be saftely stored for production
 
 ```
-
 
 1. CREATE [x]
 
@@ -118,7 +146,6 @@ export default function CreateToDo() {
     }
 ```
 
-
 ```tsx
  //ADD STATE VAR AND STATE ACTION AND ASSIGN PROPERTIES
   const [newToDoObject, setNewToDoObject] = useState({
@@ -150,7 +177,6 @@ export default function CreateToDo() {
   };
 ```
 
-
 ```tsx
 
 //Hanlde ToDoChg 
@@ -167,7 +193,7 @@ setNewToDoObject((previous : any)=> ({
 };
 ```
 
-- Make sure to match the html5 property name with the properties passed to the object 
+- Make sure to match the html5 property name with the properties passed to the object
 - Also add ```onIonChange={handleToDoCHG}``` in each input to handle the users input
 
 ```tsx
@@ -190,7 +216,6 @@ setNewToDoObject((previous : any)=> ({
 </IonGrid>
 
 ```
-
 
 Final File CreateToDo.tsx
 
@@ -329,5 +354,6 @@ export default function CreateToDo() {
 
 1. [Using Yarn Instead of Npm for Ionic #10647](https://github.com/ionic-team/ionic-framework/issues/10647)
 
-2. 
+2.
+
 Omar Zeinhom . AKA ANDGOEDU 2022-2023
