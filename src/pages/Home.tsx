@@ -1,7 +1,6 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import CreateToDo from '../components/CreateToDo/CreateToDo';
-//import ExploreContainer from '../components/ExploreContainer';
 import './Home.css';
+import { CreateToDo,EditToDo } from '../components';
 
 const Home: React.FC = () => {
   return (
@@ -18,6 +17,8 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <CreateToDo/>
+        {/* EditToDo */}
+        <EditToDo/>
       </IonContent>
     </IonPage>
   );
