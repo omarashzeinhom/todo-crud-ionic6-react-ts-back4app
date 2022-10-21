@@ -117,7 +117,8 @@ const EditToDo: FC<{}> = (): ReactElement => {
 
   return (
     <>
-      <IonRow>
+    <IonGrid fixed={true}>
+    <IonRow>
         <IonCol size="10">
           <IonButton onClick={refreshTasks} color="secondary" expand="block">
             <IonIcon icon={returnDownBack} />
@@ -129,6 +130,8 @@ const EditToDo: FC<{}> = (): ReactElement => {
         </IonCol>
       </IonRow>
 
+    </IonGrid>
+   
       {toDos?.map((todo: any, index: any) => {
         // MAP OVER THE TODOS AND RETURN THE INFO
 
