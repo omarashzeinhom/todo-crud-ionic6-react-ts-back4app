@@ -9,7 +9,7 @@ An ionic 6 , web application built in typescript and react js framework ,while i
 - ADD Api keys from [parse dashboard back4app](https://parse-dashboard.back4app.com/)
 - 1. Select your application or create a new one
   
-- 1.1 - Make ACLS public
+- 1.1 - Make ACLS public . Note this is not recommended for deployment only development
   
 - 2. Go to App settings on the left
   
@@ -28,7 +28,6 @@ REACT_APP_PARSE_JS_KEY=
 ```
 ionic serve
 ```
-
 
 - Project Built With
 
@@ -75,7 +74,6 @@ ionic start todoApp --type=react --capacitor
 ```
 yarn add @parse/react parse
 ```
-
 
 #### Setup BackEnd Schema
 
@@ -144,8 +142,6 @@ export default function CreateToDo() {
     )
     }
 ```
-
-
 
 ```tsx
  //ADD STATE VAR AND STATE ACTION AND ASSIGN PROPERTIES
@@ -346,7 +342,7 @@ export default function CreateToDo() {
 
 2. READ []
 
-```tsx 
+```tsx
 //1. STATE VAR And SetStateAction
   var [toDos, setToDos] = useState([
     {
@@ -372,9 +368,6 @@ export default function CreateToDo() {
   const parsequery: Parse.Query = new Parse.Query(ToDo);
 
 ```
-
-
-
 
 ```tsx
   //2. ASYNC Function to handle reading tasks with useCallback hook to handle each task instead of going in an infinte loop
@@ -425,9 +418,7 @@ export default function CreateToDo() {
   }, [readTasks, /*refreshTasks*/]);
   ```
 
-
 3. UPDATE []
-
 
 ```tsx
     //UPDATE TODO
@@ -445,19 +436,8 @@ export default function CreateToDo() {
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
 4. DELETE []
+
 ```tsx
    //DELETE TODO
         const deleteToDo = async () => {
@@ -480,7 +460,7 @@ export default function CreateToDo() {
 
 ```
 
-5. Refresh Tasks 
+5. Refresh Tasks
 
 ```tsx
  /*-------------< TODO REFRESH TASKS START >---------*/
@@ -515,11 +495,303 @@ export default function CreateToDo() {
 
 ```
 
+Final File in ./src/components/EditToDo/EditToDo.tsx
 
+```tsx
+import React from "react";
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCol,
+  IonIcon,
+  IonItem,
+  IonText,
+  IonCheckbox,
+  IonBadge,
+  IonRippleEffect,
+  IonRow,
+  IonGrid,
+} from "@ionic/react";
+
+import { close, returnDownBack } from "ionicons/icons";
+
+import { FC, ReactElement, useCallback, useEffect, useState } from "react";
+
+const Parse = require("parse");
+
+const EditToDo: FC<{}> = (): ReactElement => {
+  //1. STATE VAR And SetStateAction
+  var [toDos, setToDos] = useState([
+    {
+      objectId: " ",
+      title: "",
+      description: "",
+      task: "",
+      isCompleted: Boolean(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ]);
+
+  // extending the Parse object
+  const ToDo: Parse.Object[] = Parse.Object.extend("ToDo"); // extend todo
+
+  const parsequery: Parse.Query = new Parse.Query(ToDo);
+
+  //2. ASYNC Function to handle reading tasks with useCallback hook to handle each task instead of going in an infinte loop
+  const readTasks = useCallback(async function (): Promise<Boolean> {
+    try {
+      const results: Parse.Object[] = await parsequery.find();
+
+      const mappedData = [];
+
+      for (const object of results) {
+        const objId: string = object.id;
+        const title: string = object.get("title");
+        const decription: string = object.get("description");
+        const task: string = object.get("task");
+        const isCompleted: boolean = object.get("isCompleted");
+        const createdAt: Date = object.get("createdAt");
+        const updatedAt: Date = object.get("updatedAt");
+
+        let resultsFix = {
+          objectId: objId, //string
+          title: title, //string
+          description: decription,
+          task: task,
+          isCompleted: isCompleted, //boolean
+          createdAt: createdAt, //date
+          updatedAt: updatedAt, //date
+        };
+
+        mappedData.push(resultsFix);
+      }
+      setToDos(mappedData);
+      return true;
+    } catch (error: any) {
+      console.warn("Error has been found in readTasks " + error);
+      return false;
+    }
+  }, []);
+
+  console.log(toDos);
+
+  /*-------------< TODO REFRESH TASKS START >---------*/
+  const refreshTasks = useCallback(
+    async function () {
+      var query = new Parse.Query("ToDo");
+      query
+        .find()
+        .then((results: Parse.Object) => {
+          //DEBUG
+          //Stringified Value of Results
+          //const resultsStr = JSON.stringify(results);
+          //console.log("Results of ToDo parse Object is >>>" + resultsStr);
+          //
+        })
+        .then(() => {
+          query.count().then((ToDoCount: Number) => {
+            console.log("Number of tasks is = " + ToDoCount);
+          });
+        })
+        .catch((error: any) => {
+          // error is an instance of parse.error.
+          console.log(error);
+        });
+      //REFRESH TASKS TO REMOVE THE DELETED ONES ID
+      readTasks();
+      return true;
+    },
+    [readTasks]
+  );
+  /*-------------< TODO REFRESH TASKS END >---------*/
+
+  // 3. useEffect
+  useEffect(() => {
+    readTasks();
+    refreshTasks();
+  }, [readTasks, refreshTasks]);
+
+  return (
+    <>
+      <IonRow>
+        <IonCol size="10">
+          <IonButton onClick={refreshTasks} color="secondary" expand="block">
+            <IonIcon icon={returnDownBack} />
+          </IonButton>
+        </IonCol>
+
+        <IonCol size="2">
+          <IonBadge color={"medium"}>{toDos?.length}</IonBadge>
+        </IonCol>
+      </IonRow>
+
+      {toDos?.map((todo: any, index: any) => {
+        // MAP OVER THE TODOS AND RETURN THE INFO
+
+        //GET ID
+
+        var objId: string = todo?.objectId;
+        //console.log(objId);
+
+        //DELETE TODO
+        const deleteToDo = async () => {
+          try {
+            const singleObject: Parse.Object = await parsequery.get(objId);
+
+            const response: any = await singleObject.destroy();
+
+            if (response) {
+              alert(`${objId} To Do Has Been Deleted`);
+            } else {
+              alert(`Error: Nothing was Delted`);
+            }
+
+            return true;
+          } catch (error: any) {
+            console.warn("Error has been found in deleteToDo" + error);
+          }
+        };
+
+        //UPDATE TODO
+
+        const completeTask = async () => {
+          try {
+            const object = await parsequery.get(objId);
+            object.set("isCompleted", true);
+            object.set("objectId", objId);
+            object.save();
+          } catch (error: any) {
+            console.warn("Error has been found in completeTask" + error);
+          }
+        };
+
+        return (
+          <div key={todo + index}>
+            <IonGrid fixed={true}>
+              <IonRippleEffect></IonRippleEffect>
+
+              <IonCard color={todo.isCompleted === true ? "success" : "medium"}>
+                <IonCardHeader
+                  color={todo?.isCompleted === true ? "light" : "warning"}
+                >
+                  <IonRow>
+                    <IonCol size="9">
+                      <IonText
+                        color={todo?.isCompleted === true ? "dark" : "light"}
+                      >
+                        <h5>{[todo?.title?.toLocaleUpperCase() || " "]}</h5>
+                      </IonText>
+                    </IonCol>
+                    <IonCol size="3">
+                      <IonButton
+                        color="danger"
+                        expand="block"
+                        onClick={deleteToDo}
+                      >
+                        <IonIcon icon={close} />{" "}
+                      </IonButton>
+                    </IonCol>
+                  </IonRow>
+                </IonCardHeader>
+
+                <IonItem
+                  color={todo?.isCompleted === true ? "success" : "medium"}
+                >
+                  <IonText color={"light"}>
+                    Task :{[todo?.task?.toLocaleLowerCase() || " "]}
+                  </IonText>
+                </IonItem>
+
+                <IonCardSubtitle className="ion-text-center">
+                  <h5 className="ion-text-white">
+                    <strong>Description</strong>
+                  </h5>
+                  <em>{[todo?.description?.toLocaleLowerCase() || " "]}</em>
+                </IonCardSubtitle>
+
+                <IonCardContent>
+                  <IonRow>
+                    <IonCol size="10">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Task</th>
+                            <th>Completed</th>
+                            <th>CreatedAt</th>
+                            <th>updatedAt</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <tr>
+                            <td> {todo?.task}</td>
+                            <td>
+                              {" "}
+                              <IonCheckbox
+                                color="medium"
+                                // eslint-disable-next-line react/jsx-no-duplicate-props
+                                onClick={completeTask}
+                                disabled={todo?.isCompleted === true}
+                              />{" "}
+                              {todo?.isCompleted.toLocaleString()}
+                            </td>
+                            <td> {todo.createdAt?.toDateString()}</td>
+                            <td> {todo.updatedAt?.toDateString()}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </IonCol>
+                  </IonRow>
+                </IonCardContent>
+              </IonCard>
+            </IonGrid>
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
+export default EditToDo;
+
+
+```
 
 ###### References
 
-1. [Using Yarn Instead of Npm for Ionic #10647](https://github.com/ionic-team/ionic-framework/issues/10647)
+1. [Signing up in Parser - Back4App Docs](https://dashboard.back4app.com/apidocs/2gaA8FOymlxMuiFxPnGvzaDNDuNe1DOK31ytUZGi?typescript#signing-up)
+2. [Logging Page in Parser -  Back4App Docs](https://dashboard.back4app.com/apidocs#logging-in)
+3. [How TO - Responsive Text W3Schools](https://www.w3schools.com/howto/howto_css_responsive_text.asp)
+4. [User Password Reset for React Parse -  Back4App Docs](https://www.back4app.com/docs/react/working-with-users/react-password-reset)
+5. [Theming Basics Ionic-framework Colors](https://ionicframework.com/docs/theming/basics)
+6. [Theming Basics Ionic-framework Colors customziation](https://ionicframework.com/docs/theming/colors)
+7. [aaronksaunders-ionic-react-tabs-side-auth](https://github.com/aaronksaunders/ionic-react-tabs-side-auth)
+8. [Stringify a JavaScript Array](https://www.w3schools.com/js/js_json_stringify.asp)
+9. [GitHubMapBoxLanguage](https://github.com/mapbox/mapbox-gl-language/)
+10. [Map-Box Ar Example](https://mapbox.github.io/mapbox-gl-language/examples/ar.html#3/38.88/-98)
+11. [CodePen HomeChange a map's language](https://codepen.io/pen)
+12. [Parse~ ParseQuery](https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Query.html)
+13. [use-react-memo-wisely/](https://dmitripavlutin.com/use-react-memo-wisely/)
+14. [React.memo](https://reactjs.org/docs/react-api.html#reactmemo)
+15. [Migrating from npm](https://classic.yarnpkg.com/lang/en/docs/migrating-from-npm/)
+16. [Colors - Ionic](https://ionicframework.com/docs/theming/colors)
+17. [Parse JS Guide](https://docs.parseplatform.org/js/guide/)
+18. [Building Your Own Hooks](https://reactjs.org/docs/hooks-custom.html)
+19. [react-chat-app - Back4App Docs](https://www.back4app.com/docs/react/real-time/react-chat-app)
+20. [React CRUD tutorial - Back4App Docs](https://www.back4app.com/docs/react/data-objects/react-crud-tutorial)
+21. [Ionic - Inputs](https://ionicframework.com/docs/api/input)
+22. [Ionic - IonCheckBox](https://ionicframework.com/docs/api/checkbox)
+23. [Ionic - ion-radio](https://ionicframework.com/docs/api/radio)
+24. [this operator js - MDN Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this)
+25. [Ionic -ion-grid](https://ionicframework.com/docs/api/grid)
+26. [Does not provide a valid apple-touch-icon](https://web.dev/apple-touch-icon/)
+27. [Ionic -React Navigation](https://ionicframework.com/docs/react/**navigation**)
+28. [ReactJs - useCallback hook](https://reactjs.org/docs/hooks-reference.html#usecallback)
+29. [Using Yarn Instead of Npm for Ionic #10647](https://github.com/ionic-team/ionic-framework/issues/10647)
 
 2.
 
