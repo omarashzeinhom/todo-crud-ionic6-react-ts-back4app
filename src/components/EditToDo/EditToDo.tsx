@@ -32,8 +32,7 @@ import { ParseOptions } from "querystring";
 const Parse = require("parse");
 
 const EditToDo: FC<{}> = (): ReactElement => {
-  //STATE VAR And SetStateAction
-
+  //1. STATE VAR And SetStateAction
   var [toDos, setToDos] = useState([
     {
       objectId: " ",
@@ -47,13 +46,12 @@ const EditToDo: FC<{}> = (): ReactElement => {
   ]);
 
   // extending the Parse object
+  const ToDo: Parse.Object[] = Parse.Object.extend("ToDo"); // extend todo
 
-  // ASYNC Function to handle reading tasks with useCallback hook to handle each task instead of going in an infinte loop
+  const parsequery: Parse.Query = new Parse.Query(ToDo);
+
+  //2. ASYNC Function to handle reading tasks with useCallback hook to handle each task instead of going in an infinte loop
   const readTasks = useCallback(async function (): Promise<Boolean> {
-    const ToDo: Parse.Object[] = Parse.Object.extend("ToDo"); // extend todo
-
-    const parsequery: Parse.Query = new Parse.Query(ToDo);
-
     try {
       const results: Parse.Object[] = await parsequery.find();
 
@@ -90,15 +88,53 @@ const EditToDo: FC<{}> = (): ReactElement => {
 
   console.log(toDos);
 
-  // 3. useEffect 
+  // 3. useEffect
   useEffect(() => {
     readTasks();
   }, [readTasks]);
 
-
   return (
     <>
       {toDos?.map((todo: any, index: any) => {
+        // MAP OVER THE TODOS AND RETURN THE INFO
+
+        //GET ID
+
+        var objId: string = todo?.objectId;
+        //console.log(objId);
+
+        //DELETE TODO
+        const deleteToDo = async () => {
+          try {
+            const singleObject: Parse.Object = await parsequery.get(objId);
+
+            const response: any = await singleObject.destroy();
+
+            if (response) {
+              alert(`${objId} To Do Has Been Deleted`);
+            } else {
+              alert(`Error: Nothing was Delted`);
+            }
+
+            return true;
+          } catch (error: any) {
+            console.warn("Error has been found in deleteToDo" + error);
+          }
+        };
+
+        //UPDATE TODO
+
+        const completeTask = async () => {
+          try {
+            const object = await parsequery.get(objId);
+            object.set("isCompleted", true);
+            object.set("objectId", objId);
+            object.save();
+          } catch (error: any) {
+            console.warn("Error has been found in completeTask" + error);
+          }
+        };
+
         return (
           <div key={todo + index}>
             <table>
@@ -120,12 +156,22 @@ const EditToDo: FC<{}> = (): ReactElement => {
                   <td> {todo?.title}</td>
                   <td> {todo?.description}</td>
                   <td> {todo?.task}</td>
-                  <td> {todo?.isCompleted.toLocaleString()}</td>
+                  <td>  <IonCheckbox
+                                  color="medium"
+                                  // eslint-disable-next-line react/jsx-no-duplicate-props
+                                  onClick={completeTask}
+                                  disabled={todo?.isCompleted === true}
+                                /> {todo?.isCompleted.toLocaleString()
+                                
+                                }</td>
                   <td> {todo.createdAt?.toDateString()}</td>
                   <td> {todo.updatedAt?.toDateString()}</td>
                 </tr>
               </tbody>
             </table>
+            <IonButton color="danger" expand="block" onClick={deleteToDo}>
+              <IonIcon icon={close} />{" "}
+            </IonButton>
 
             <p color="sucess">
               ObjectId : Title: Description: Task: Completed CreatedAt UpdatedAt
