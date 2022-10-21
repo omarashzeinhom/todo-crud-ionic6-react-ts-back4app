@@ -75,20 +75,6 @@ ionic start todoApp --type=react --capacitor
 yarn add @parse/react parse
 ```
 
-#### Setup BackEnd Schema
-
-```ts
-// Step 1 Add Parse API Keys into App.tsx
-//  Require Parse for tsx
-const Parse = require('parse');
-
-// Step 1 Your Parse initialization configuration goes here
-const PARSE_APPLICATION_ID = ' ';
-const PARSE_HOST_URL = 'https://parseapi.back4app.com/';
-const PARSE_JAVASCRIPT_KEY = ' ';
-
-```
-
 ##### Project Structure and files to add
 
 ```
