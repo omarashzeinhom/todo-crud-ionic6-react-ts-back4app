@@ -76,7 +76,6 @@ ionic start todoApp --type=react --capacitor
 yarn add @parse/react parse
 ```
 
-`````` []()
 
 #### Setup BackEnd Schema
 
@@ -145,6 +144,8 @@ export default function CreateToDo() {
     )
     }
 ```
+
+
 
 ```tsx
  //ADD STATE VAR AND STATE ACTION AND ASSIGN PROPERTIES
@@ -341,14 +342,180 @@ export default function CreateToDo() {
     </>
   );
 }
-
 ```
 
 2. READ []
 
+```tsx 
+//1. STATE VAR And SetStateAction
+  var [toDos, setToDos] = useState([
+    {
+      objectId: " ",
+      title: "",
+      description: "",
+      task: "",
+      isCompleted: Boolean(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ]);
+
+
+
+
+```
+
+```tsx
+ // extending the Parse object
+  const ToDo: Parse.Object[] = Parse.Object.extend("ToDo"); // extend todo
+
+  const parsequery: Parse.Query = new Parse.Query(ToDo);
+
+```
+
+
+
+
+```tsx
+  //2. ASYNC Function to handle reading tasks with useCallback hook to handle each task instead of going in an infinte loop
+  const readTasks = useCallback(async function (): Promise<Boolean> {
+    try {
+      const results: Parse.Object[] = await parsequery.find();
+
+      const mappedData = [];
+
+      for (const object of results) {
+        const objId: string = object.id;
+        const title: string = object.get("title");
+        const decription: string = object.get("description");
+        const task: string = object.get("task");
+        const isCompleted: boolean = object.get("isCompleted");
+        const createdAt: Date = object.get("createdAt");
+        const updatedAt: Date = object.get("updatedAt");
+
+        let resultsFix = {
+          objectId: objId, //string
+          title: title, //string
+          description: decription,
+          task: task,
+          isCompleted: isCompleted, //boolean
+          createdAt: createdAt, //date
+          updatedAt: updatedAt, //date
+        };
+
+        mappedData.push(resultsFix);
+      }
+      setToDos(mappedData);
+      return true;
+    } catch (error: any) {
+      console.warn("Error has been found in readTasks " + error);
+      return false;
+    }
+  }, []);
+
+  console.log(toDos);
+```
+
+```tsx
+  // 3. useEffect
+  useEffect(() => {
+    readTasks();
+    //uncomment these lines after addint the refreshTasks async arrow function
+    //refreshTasks();
+  }, [readTasks, /*refreshTasks*/]);
+  ```
+
+
 3. UPDATE []
 
+
+```tsx
+    //UPDATE TODO
+
+        const completeTask = async () => {
+          try {
+            const object = await parsequery.get(objId);
+            object.set("isCompleted", true);
+            object.set("objectId", objId);
+            object.save();
+          } catch (error: any) {
+            console.warn("Error has been found in completeTask" + error);
+          }
+        };
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 4. DELETE []
+```tsx
+   //DELETE TODO
+        const deleteToDo = async () => {
+          try {
+            const singleObject: Parse.Object = await parsequery.get(objId);
+
+            const response: any = await singleObject.destroy();
+
+            if (response) {
+              alert(`${objId} To Do Has Been Deleted`);
+            } else {
+              alert(`Error: Nothing was Delted`);
+            }
+
+            return true;
+          } catch (error: any) {
+            console.warn("Error has been found in deleteToDo" + error);
+          }
+        };
+
+```
+
+5. Refresh Tasks 
+
+```tsx
+ /*-------------< TODO REFRESH TASKS START >---------*/
+  const refreshTasks = useCallback(
+    async function () {
+      var query = new Parse.Query("ToDo");
+      query
+        .find()
+        .then((results: Parse.Object) => {
+          //DEBUG
+          //Stringified Value of Results
+          //const resultsStr = JSON.stringify(results);
+          //console.log("Results of ToDo parse Object is >>>" + resultsStr);
+          //
+        })
+        .then(() => {
+          query.count().then((ToDoCount: Number) => {
+            console.log("Number of tasks is = " + ToDoCount);
+          });
+        })
+        .catch((error: any) => {
+          // error is an instance of parse.error.
+          console.log(error);
+        });
+      //REFRESH TASKS TO REMOVE THE DELETED ONES ID
+      readTasks();
+      return true;
+    },
+    [readTasks]
+  );
+  /*-------------< TODO REFRESH TASKS END >---------*/
+
+```
+
+
 
 ###### References
 

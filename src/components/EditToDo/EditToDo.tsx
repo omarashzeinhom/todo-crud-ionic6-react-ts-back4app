@@ -6,28 +6,19 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCol,
-  IonContent,
-  IonGrid,
   IonIcon,
-  IonPage,
-  IonRow,
   IonItem,
-  IonItemDivider,
   IonText,
   IonCheckbox,
   IonBadge,
-  IonLabel,
-  IonList,
   IonRippleEffect,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
+  IonRow,
+  IonGrid,
 } from "@ionic/react";
 
 import { close, returnDownBack } from "ionicons/icons";
 
 import { FC, ReactElement, useCallback, useEffect, useState } from "react";
-import { ParseOptions } from "querystring";
 
 const Parse = require("parse");
 
@@ -88,13 +79,56 @@ const EditToDo: FC<{}> = (): ReactElement => {
 
   console.log(toDos);
 
+  /*-------------< TODO REFRESH TASKS START >---------*/
+  const refreshTasks = useCallback(
+    async function () {
+      var query = new Parse.Query("ToDo");
+      query
+        .find()
+        .then((results: Parse.Object) => {
+          //DEBUG
+          //Stringified Value of Results
+          //const resultsStr = JSON.stringify(results);
+          //console.log("Results of ToDo parse Object is >>>" + resultsStr);
+          //
+        })
+        .then(() => {
+          query.count().then((ToDoCount: Number) => {
+            console.log("Number of tasks is = " + ToDoCount);
+          });
+        })
+        .catch((error: any) => {
+          // error is an instance of parse.error.
+          console.log(error);
+        });
+      //REFRESH TASKS TO REMOVE THE DELETED ONES ID
+      readTasks();
+      return true;
+    },
+    [readTasks]
+  );
+  /*-------------< TODO REFRESH TASKS END >---------*/
+
   // 3. useEffect
   useEffect(() => {
     readTasks();
-  }, [readTasks]);
+    refreshTasks();
+  }, [readTasks, refreshTasks]);
 
   return (
     <>
+      <IonRow>
+        <IonCol size="10">
+          <IonButton onClick={refreshTasks} color="secondary" expand="block">
+            <IonIcon icon={returnDownBack} />
+          </IonButton>
+        </IonCol>
+
+        <IonCol size="2">
+          <IonBadge color={"medium"}>{toDos?.length}</IonBadge>
+        </IonCol>
+      </IonRow>
+
       {toDos?.map((todo: any, index: any) => {
         // MAP OVER THE TODOS AND RETURN THE INFO
 
@@ -137,45 +171,84 @@ const EditToDo: FC<{}> = (): ReactElement => {
 
         return (
           <div key={todo + index}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Object Id</th>
-                  <th>Title</th>
-                  <th>Description</th>
-                  <th>Task</th>
-                  <th>Completed</th>
-                  <th>CreatedAt</th>
-                  <th>updatedAt</th>
-                </tr>
-              </thead>
+            <IonGrid fixed={true}>
+              <IonRippleEffect></IonRippleEffect>
 
-              <tbody>
-                <tr>
-                  <td> {todo?.objectId}</td>
-                  <td> {todo?.title}</td>
-                  <td> {todo?.description}</td>
-                  <td> {todo?.task}</td>
-                  <td>  <IonCheckbox
-                                  color="medium"
-                                  // eslint-disable-next-line react/jsx-no-duplicate-props
-                                  onClick={completeTask}
-                                  disabled={todo?.isCompleted === true}
-                                /> {todo?.isCompleted.toLocaleString()
-                                
-                                }</td>
-                  <td> {todo.createdAt?.toDateString()}</td>
-                  <td> {todo.updatedAt?.toDateString()}</td>
-                </tr>
-              </tbody>
-            </table>
-            <IonButton color="danger" expand="block" onClick={deleteToDo}>
-              <IonIcon icon={close} />{" "}
-            </IonButton>
+              <IonCard color={todo.isCompleted === true ? "success" : "medium"}>
+                <IonCardHeader
+                  color={todo?.isCompleted === true ? "light" : "warning"}
+                >
+                  <IonRow>
+                    <IonCol size="9">
+                      <IonText
+                        color={todo?.isCompleted === true ? "dark" : "light"}
+                      >
+                        <h5>{[todo?.title?.toLocaleUpperCase() || " "]}</h5>
+                      </IonText>
+                    </IonCol>
+                    <IonCol size="3">
+                      <IonButton
+                        color="danger"
+                        expand="block"
+                        onClick={deleteToDo}
+                      >
+                        <IonIcon icon={close} />{" "}
+                      </IonButton>
+                    </IonCol>
+                  </IonRow>
+                </IonCardHeader>
 
-            <p color="sucess">
-              ObjectId : Title: Description: Task: Completed CreatedAt UpdatedAt
-            </p>
+                <IonItem
+                  color={todo?.isCompleted === true ? "success" : "medium"}
+                >
+                  <IonText color={"light"}>
+                    Task :{[todo?.task?.toLocaleLowerCase() || " "]}
+                  </IonText>
+                </IonItem>
+
+                <IonCardSubtitle className="ion-text-center">
+                  <h5 className="ion-text-white">
+                    <strong>Description</strong>
+                  </h5>
+                  <em>{[todo?.description?.toLocaleLowerCase() || " "]}</em>
+                </IonCardSubtitle>
+
+                <IonCardContent>
+                  <IonRow>
+                    <IonCol size="10">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Task</th>
+                            <th>Completed</th>
+                            <th>CreatedAt</th>
+                            <th>updatedAt</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <tr>
+                            <td> {todo?.task}</td>
+                            <td>
+                              {" "}
+                              <IonCheckbox
+                                color="medium"
+                                // eslint-disable-next-line react/jsx-no-duplicate-props
+                                onClick={completeTask}
+                                disabled={todo?.isCompleted === true}
+                              />{" "}
+                              {todo?.isCompleted.toLocaleString()}
+                            </td>
+                            <td> {todo.createdAt?.toDateString()}</td>
+                            <td> {todo.updatedAt?.toDateString()}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </IonCol>
+                  </IonRow>
+                </IonCardContent>
+              </IonCard>
+            </IonGrid>
           </div>
         );
       })}
