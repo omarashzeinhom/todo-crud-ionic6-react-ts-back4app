@@ -6,7 +6,7 @@
     "@capacitor/app": "4.0.1",
     "@capacitor/core": "4.8.2",
     "@capacitor/haptics": "4.0.1",
-    "@capacitor/keyboard": "4.0.1",
+    "@capacitor/keyboard": "4.1.1",
     "@capacitor/status-bar": "4.0.1",
     "@ionic/react": "^6.0.0",
     "@ionic/react-router": "^6.7.5",
